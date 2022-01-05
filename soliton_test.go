@@ -4,9 +4,59 @@ import (
 	"math"
 	"math/rand"
 	"testing"
+	"strconv"
 )
 
+// constRNG implements rand.Source and always returns one value.
+type constRNG struct {
+	val int64
+}
+
+func (c constRNG) Seed(seed int64) {
+}
+
+func (c constRNG) Int63() int64 {
+	return c.val
+}
+
 var rng = rand.New(rand.NewSource(0))
+
+func BenchmarkSample(b *testing.B) {
+	ks := []int{10, 50, 100, 200, 1000, 10000, 100000}
+	for _, k := range ks {
+		name := strconv.Itoa(k)
+		dist := NewSoliton(rng, uint64(k))
+		b.Run(name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				dist.Uint64()
+			}
+		})
+	}
+}
+
+// TestUint64 tests the sampling of soliton distribution.
+func TestUint64(t *testing.T) {
+	r1 := rand.New(constRNG{0})
+	s1 := NewSoliton(r1, 3)
+	if s1.Uint64() != 1 {
+		t.Error("wrong sampled value, should be 1")
+	}
+
+	var norm float64
+	norm = 1<<63
+	r2 := rand.New(constRNG{int64(0.35 * norm)})
+	s2 := NewSoliton(r2, 3)
+	if s2.Uint64() != 2 {
+		t.Error("wrong sampled value, should be 2")
+	}
+
+	r3 := rand.New(constRNG{int64(0.9 * norm)})
+	s3 := NewSoliton(r3, 3)
+	if s3.Uint64() != 3 {
+		t.Error("wrong sampled value, should be 3")
+	}
+}
 
 // TestNewSoliton tests the creation of a soliton distribution.
 func TestNewSoliton(t *testing.T) {

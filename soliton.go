@@ -1,4 +1,4 @@
-// Package soliton implements Soliton distribution as in error correcting codes.
+// Package soliton implements Soliton distribution as proposed in LT code.
 package soliton
 
 import (
@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-// A Soliton generates Soliton distributed variates.
+// Soliton generates Soliton distributed variates.
 type Soliton struct {
 	r      *rand.Rand
 	k      uint64
@@ -113,7 +113,7 @@ func (s *Soliton) Uint64() uint64 {
 	return uint64(idx + 1)
 }
 
-// Equals compares the two soliton distributions.
+// Equals compares the two soliton distributions by comparing the partition.
 func (s *Soliton) Equals(s2 *Soliton) bool {
 	if s.k != s2.k {
 		return false
