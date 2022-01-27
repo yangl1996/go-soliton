@@ -58,6 +58,15 @@ func TestUint64(t *testing.T) {
 	}
 }
 
+// TestMean tests the calculation of the mean of a soliton distribution.
+func TestMean(t *testing.T) {
+	s := NewSoliton(rng, 4);
+	m := s.Mean()
+	if math.Abs(m-0.25-1-0.5-0.333333333) > 0.000001 {
+		t.Error("wrong mean value")
+	}
+}
+
 // TestNewSoliton tests the creation of a soliton distribution.
 func TestNewSoliton(t *testing.T) {
 	s1 := NewSoliton(rng, 1)

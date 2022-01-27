@@ -128,3 +128,15 @@ func (s *Soliton) Equals(s2 *Soliton) bool {
 	}
 	return true
 }
+
+// Mean calculates the mean of a Soliton distribution.
+func (s *Soliton) Mean() float64 {
+	res := 0.0
+	lastCdf := 0.0
+	for i := range s.splits {
+		res += (s.splits[i]-lastCdf) * float64(i+1)
+		lastCdf = s.splits[i]
+	}
+	res += (1.0-lastCdf) * float64(s.k)
+	return res
+}
