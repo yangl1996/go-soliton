@@ -140,3 +140,15 @@ func (s *Soliton) Mean() float64 {
 	res += (1.0-lastCdf) * float64(s.k)
 	return res
 }
+
+// PMF returns the probability mass function as a slice of float64, where the i-th
+// element is the probability of i+1.
+func (s *Soliton) PMF() []float64 {
+	last := 0.0
+	res := []float64{}
+	for _, p := range s.splits {
+		res = append(res, p-last)
+		last = p
+	}
+	return res
+}
