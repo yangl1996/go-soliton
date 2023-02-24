@@ -1,4 +1,4 @@
-go-soliton is a Go implementation of the Soliton distribution, as in
-error correcting codes.
+go-soliton is a Go implementation of Soliton and Robust Soliton distribution,
+as proposed in LT codes.
 
 Documentation: https://pkg.go.dev/github.com/yangl1996/soliton

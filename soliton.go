@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-// Soliton generates Soliton distributed variates.
+// Soliton generates Soliton or Robust Soliton distributed variates.
 type Soliton struct {
 	r      *rand.Rand
 	k      uint64
@@ -66,7 +66,7 @@ func rho(k, i uint64) float64 {
 /*
 NewSoliton returns a Soliton variate generator that uses
 src as the source of randomness. The distribution has a single
-parameter, k. The PDF is given by
+parameter, k. The PMF of the distribution is given by
 	p(1) = 1/k
 	P(i) = 1/(i*(i-1)).
 
@@ -97,7 +97,7 @@ func (s *Soliton) Uint64() uint64 {
 	return uint64(idx + 1)
 }
 
-// Equals compares the two soliton distributions by comparing the partition.
+// Equals compares the two soliton distributions by comparing the PMF.
 func (s *Soliton) Equals(s2 *Soliton) bool {
 	if s.k != s2.k {
 		return false
@@ -126,7 +126,7 @@ func (s *Soliton) Mean() float64 {
 }
 
 // PMF returns the probability mass function as a slice of float64, where the i-th
-// element is the probability of i+1.
+// element is the probability of a sample being i+1.
 func (s *Soliton) PMF() []float64 {
 	last := 0.0
 	res := []float64{}
