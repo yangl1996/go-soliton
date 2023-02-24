@@ -86,7 +86,10 @@ func TestNewSoliton(t *testing.T) {
 	if len(s3.splits) != 3 {
 		t.Error("wrong soliton distribution for k=3")
 	}
-	if s3.splits[0] != (1.0/3.0) || s3.splits[1] != (1.0/3.0+0.5) || s3.splits[2] != 1.0 {
+	e1 := math.Abs(s3.splits[0] - 1.0/3.0) < 0.00000001
+	e2 := math.Abs(s3.splits[1] - (1.0/3.0+0.5)) < 0.00000001
+	e3 := s3.splits[2] == 1.0
+	if !(e1 && e2 && e3) {
 		t.Error("wrong soliton distribution for k=3")
 	}
 }

@@ -1,9 +1,9 @@
-// Package soliton implements Soliton distribution as proposed in LT code.
+// Package soliton implements Soliton and Robust Soliton distributions as
+// proposed in paper "LT codes" by Michael Luby.
 package soliton
 
 import (
 	"math"
-	"math/big"
 	"math/rand"
 	"sort"
 )
@@ -20,39 +20,30 @@ type Soliton struct {
 // https://en.wikipedia.org/wiki/Soliton_distribution#Robust_distribution
 // for definitions of the parameters k, c, and delta.
 func NewRobustSoliton(src *rand.Rand, k uint64, c, delta float64) *Soliton {
-	var sum []*big.Float
-	tot := new(big.Float)
+	var sum []float64
+	tot := 0.0
 	var i uint64
 	for i = 1; i <= k; i++ {
-		x := new(big.Float).Copy(tot)
-		sum = append(sum, x)
-		tot.Add(tot, rho(k, i))
-		tot.Add(tot, tau(c, delta, k, i))
+		sum = append(sum, tot)
+		tot += (rho(k, i) + tau(c, delta, k, i))
 	}
-	var s []float64
 	for i = 1; i < k; i++ {
-		val, _ := new(big.Float).Quo(sum[i], tot).Float64()
-		s = append(s, val)
+		sum[i] /= tot
 	}
-	s = append(s, 1.0)
-	return &Soliton{src, k, s}
+	sum = append(sum, 1.0)
+	return &Soliton{src, k, sum[1:]}
 }
 
 // tau implements the function tau for the robust Soliton distribution
-func tau(c, delta float64, k, i uint64) *big.Float {
+func tau(c, delta float64, k, i uint64) float64 {
 	r := ripple(c, delta, k)
-	rf := new(big.Float).SetFloat64(r)
-	th := uint64(math.Round(float64(k) / r)) // k/R
+	th := uint64(math.Round(float64(k) / r))
 	if i < th {                              // 1 to k/R-1
-		ik := new(big.Float).SetUint64(i * k)
-		return new(big.Float).Quo(rf, ik)
+		return r / float64(i * k)
 	} else if i == th { // k/R
-		log := math.Log(r) - math.Log(delta)
-		logf := new(big.Float).SetFloat64(log)
-		r1 := new(big.Float).Mul(rf, logf)
-		return new(big.Float).Quo(r1, new(big.Float).SetUint64(k))
+		return r * (math.Log(r) - math.Log(delta)) / float64(k)
 	} else { // k/R+1 to k
-		return new(big.Float).SetUint64(0)
+		return 0
 	}
 }
 
@@ -64,17 +55,11 @@ func ripple(c, delta float64, k uint64) float64 {
 }
 
 // rho implements the rho(i) function in soliton distribution.
-func rho(k, i uint64) *big.Float {
+func rho(k, i uint64) float64 {
 	if i == 1 {
-		one := new(big.Float).SetFloat64(1.0)
-		div := new(big.Float).SetUint64(k)
-		return new(big.Float).Quo(one, div)
+		return 1.0 / float64(k)
 	} else {
-		one := new(big.Float).SetFloat64(1.0)
-		t1 := new(big.Float).SetUint64(i)
-		t2 := new(big.Float).SetUint64(i - 1)
-		div := new(big.Float).Mul(t1, t2)
-		return new(big.Float).Quo(one, div)
+		return 1.0 / float64(i * (i-1))
 	}
 }
 
@@ -90,13 +75,12 @@ more detailed description of Soliton and related distributions.
 */
 func NewSoliton(src *rand.Rand, k uint64) *Soliton {
 	var s []float64
-	last := new(big.Float).SetUint64(0)
+	last := 0.0
 	var i uint64
 	for i = 1; i < k; i++ { // we only do 1 to k-1 (incl.) because we only need k-1 splits
 		p := rho(k, i)
-		last = last.Add(last, p)
-		rounded, _ := last.Float64()
-		s = append(s, rounded)
+		last += p
+		s = append(s, last)
 	}
 	s = append(s, 1.0)
 	return &Soliton{src, k, s}
